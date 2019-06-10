@@ -1,18 +1,31 @@
 #ifndef _CPU_H_
 #define _CPU_H_
 
+// PC: Program Counter, address of the currently executing instruction
+// IR: Instruction Register, contains a copy of the currently executing instruction
+// MAR: Memory Address Register, holds the memory address we're reading or writing
+// MDR: Memory Data Register, holds the value to write or the value just read
+
 // Holds all information about the CPU
-struct cpu {
+struct cpu
+{
   // TODO
+
   // PC
+  int pc;
+
   // registers (array)
+  unsigned char registers[8];
+
   // ram (array)
+  unsigned char ram[256];
 };
 
 // ALU operations
-enum alu_op {
-	ALU_MUL
-	// Add more here
+enum alu_op
+{
+  ALU_MUL
+  // Add more here
 };
 
 // Instructions
@@ -20,8 +33,8 @@ enum alu_op {
 // These use binary literals. If these aren't available with your compiler, hex
 // literals should be used.
 
-#define LDI  0b10000010
-#define PRN  0b01000111
+#define LDI 0b10000010
+#define PRN 0b01000111
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations
