@@ -24,7 +24,7 @@ struct cpu
 // ALU operations
 enum alu_op
 {
-  ALU_MUL
+  ALU_MUL = 0b10100010
   // Add more here
 };
 
@@ -36,11 +36,13 @@ enum alu_op
 #define LDI 0b10000010 // Set the value of a register to an integer.
 #define PRN 0b01000111 // Print numeric value stored in the given register.
 #define HLT 0b00000001 // Halt
+#define MUL 0b10100010 // Multiply
+
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations
 
-extern void cpu_load(struct cpu *cpu);
+extern void cpu_load(struct cpu *cpu, char *filename);
 extern void cpu_init(struct cpu *cpu);
 extern void cpu_run(struct cpu *cpu);
 

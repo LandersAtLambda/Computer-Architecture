@@ -8,30 +8,57 @@
 // IR: Instruction Register, contains a copy of the currently executing instruction
 // MAR: Memory Address Register, holds the memory address we're reading or writing
 // MDR: Memory Data Register, holds the value to write or the value just read
-
+void cpu_ram_read(struct cpu *cpu, int index)
+{
+  if (index > 256 || index < 0)
+  {
+    printf("Index out of range");
+  }
+  // printf("%d\n", cpu->ram[index]);
+  printf("Index out of range");
+}
+void cpu_ram_write(struct cpu *cpu, unsigned char element, int index)
+{
+  if (index > 256 || index < 0)
+  {
+    printf("Index out of range");
+  }
+  cpu->ram[index] = element;
+}
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
-void cpu_load(struct cpu *cpu)
+// void cpu_load(struct cpu *cpu)
+void cpu_load(struct cpu *cpu, char *filename)
 {
-  char data[DATA_LEN] = {
-      // From print8.ls8
-      0b10000010, // LDI R0,8 - LOAD
-      0b00000000,
-      0b00001000,
-      0b01000111, // PRN R0 - PRINT
-      0b00000000,
-      0b00000001 // HLT - HALT
-  };
-
+  FILE *fp;
+  char line[1024];
   int address = 0;
 
-  for (int i = 0; i < DATA_LEN; i++)
+  fp = fopen(filename, "r");
+
+  if (fp == NULL)
   {
-    cpu->ram[address++] = data[i];
+    fprintf(stderr, "file not found\n");
+    exit(1);
   }
 
-  // TODO: Replace this with something less hard-coded
+  while (fgets(line, 1024, fp) != NULL)
+  { // not EOF
+    char *endptr;
+
+    unsigned char v = strtoul(line, &endptr, 2);
+
+    if (endptr == line)
+    {
+      continue;
+    }
+
+    cpu_ram_write(cpu, v, address);
+    address++;
+  }
+
+  fclose(fp);
 }
 
 /**
@@ -39,10 +66,12 @@ void cpu_load(struct cpu *cpu)
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
+
   switch (op)
   {
   case ALU_MUL:
     // TODO
+    cpu->registers[0] = cpu->registers[regA] * cpu->registers[regB];
     break;
 
     // TODO: implement more ALU ops
@@ -55,23 +84,23 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
-  int ir;          // Instruction Register, contains a copy of the currently executing instruction
+  int instruction; // Instruction Register, contains a copy of the currently executing instruction
   int operandA;
   int operandB;
   while (running)
   {
-    ir = cpu->ram[cpu->pc];
-    if (ir > 128)
+    instruction = cpu->ram[cpu->pc];
+    if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
       operandB = cpu->ram[cpu->pc + 2];
     }
-    else if (ir < 128 && ir > 64)
+    else if (instruction >> 6 == 1)
     {
       operandA = cpu->ram[cpu->pc + 1];
     }
 
-    switch (ir)
+    switch (instruction)
     {
     case LDI:
       cpu->registers[operandA] = operandB;
@@ -81,11 +110,15 @@ void cpu_run(struct cpu *cpu)
       printf("%d\n", cpu->registers[operandA]);
       cpu->pc += 2;
       break;
+    case MUL:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
     case HLT:
       running = 0;
       break;
     default:
-      printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
+      printf("Unknown instruction %02x at address %02x\n", instruction, cpu->pc);
       exit(1);
     }
   }
@@ -107,23 +140,4 @@ void cpu_init(struct cpu *cpu)
   cpu->pc = 0;
   memset(cpu->registers, 0, 8);
   memset(cpu->ram, 0, 256);
-}
-
-void cpu_ram_read(struct cpu *cpu, int index)
-{
-  if (index > 256 || index < 0)
-  {
-    printf("Index out of range");
-  }
-  // printf("%d\n", cpu->ram[index]);
-  printf("Index out of range");
-}
-void cpu_ram_write(struct cpu *cpu, unsigned char element, int index)
-{
-  if (index > 256 || index < 0)
-  {
-    printf("Index out of range");
-  }
-  printf("Index out of range");
-  // cpu->ram[index] = element;
 }
