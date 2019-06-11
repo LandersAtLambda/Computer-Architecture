@@ -70,11 +70,7 @@ void cpu_run(struct cpu *cpu)
     {
       operandA = cpu->ram[cpu->pc + 1];
     }
-    else if (ir < 64)
-    {
 
-      printf("%d", 0);
-    }
     switch (ir)
     {
     case LDI:
@@ -88,7 +84,6 @@ void cpu_run(struct cpu *cpu)
     case HLT:
       running = 0;
       break;
-
     default:
       printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
       exit(1);
