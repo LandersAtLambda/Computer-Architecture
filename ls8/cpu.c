@@ -85,8 +85,9 @@ void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
   int instruction; // Instruction Register, contains a copy of the currently executing instruction
-  int operandA;
-  int operandB;
+  int operandA, operandB, reg, v;
+  int SP = 7;
+
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
@@ -113,6 +114,22 @@ void cpu_run(struct cpu *cpu)
     case MUL:
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
+      break;
+    case PUSH:
+      cpu->registers[SP]--; // decrement SP
+      reg = cpu->ram[cpu->pc + 1];
+      v = cpu->registers[reg]; // now push v on stack
+      cpu->ram[cpu->registers[SP]] = v;
+
+      cpu->pc += 2; // this is a 2-byte instruction
+      break;
+    case POP:
+      reg = cpu->ram[cpu->pc + 1];
+      v = cpu->ram[cpu->registers[SP]];
+      cpu->registers[reg] = v;
+      cpu->registers[SP]++;
+
+      cpu->pc += 2; // this is a 2-byte instruction
       break;
     case HLT:
       running = 0;

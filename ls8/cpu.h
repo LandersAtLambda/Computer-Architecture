@@ -33,10 +33,12 @@ enum alu_op
 // These use binary literals. If these aren't available with your compiler, hex
 // literals should be used.
 
-#define LDI 0b10000010 // Set the value of a register to an integer.
-#define PRN 0b01000111 // Print numeric value stored in the given register.
-#define HLT 0b00000001 // Halt
-#define MUL 0b10100010 // Multiply
+#define LDI 0b10000010  // Set the value of a register to an integer.
+#define PRN 0b01000111  // Print numeric value stored in the given register.
+#define HLT 0b00000001  // Halt
+#define MUL 0b10100010  // Multiply
+#define PUSH 0b01000101 // Push
+#define POP 0b01000110  // POP
 
 // TODO: more instructions here. These can be used in cpu_run().
 
