@@ -24,7 +24,8 @@ struct cpu
 // ALU operations
 enum alu_op
 {
-  ALU_MUL = 0b10100010
+  ALU_MUL = 0b10100010,
+  ALU_ADD = 0b10100000
   // Add more here
 };
 
@@ -39,6 +40,9 @@ enum alu_op
 #define MUL 0b10100010  // Multiply
 #define PUSH 0b01000101 // Push
 #define POP 0b01000110  // POP
+#define CALL 0b01010000 // CALL
+#define RET 0b00010001  // RET
+#define ADD 0b10100000  // ADD
 
 // TODO: more instructions here. These can be used in cpu_run().
 
