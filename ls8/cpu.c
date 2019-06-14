@@ -77,7 +77,6 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     // TODO
     cpu->registers[0] = cpu->registers[regA] + cpu->registers[regB];
     break;
-
   case ALU_CMP:
     // TODO
     // `FL` bits: `00000LGE`
@@ -131,6 +130,16 @@ void cpu_run(struct cpu *cpu)
     case JMP:
       cpu->pc = cpu->registers[operandA];
       break;
+    case JNE:
+      if (cpu->fl != 1)
+      {
+        cpu->pc = cpu->registers[operandA];
+      }
+      else
+      {
+        cpu->pc += 2;
+      }
+      break;
     case CMP:
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
@@ -147,7 +156,6 @@ void cpu_run(struct cpu *cpu)
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
       break;
-
     case PUSH:
       cpu->registers[SP]--;
       reg = cpu->ram[cpu->pc + 1];
