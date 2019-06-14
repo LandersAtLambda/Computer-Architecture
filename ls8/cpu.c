@@ -73,6 +73,10 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     // TODO
     cpu->registers[0] = cpu->registers[regA] * cpu->registers[regB];
     break;
+  case ALU_ADD:
+    // TODO
+    cpu->registers[0] = cpu->registers[regA] + cpu->registers[regB];
+    break;
 
     // TODO: implement more ALU ops
   }
@@ -85,11 +89,13 @@ void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
   int instruction; // Instruction Register, contains a copy of the currently executing instruction
-  int operandA;
-  int operandB;
+  int operandA, operandB, reg, v, retaddr;
+  int SP = 7;
+
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
+    // printf("TRACE: %02X: %02X %02X %02X\n", cpu->pc, instruction, cpu->ram[cpu->pc + 1], cpu->ram[cpu->pc + 2]);
     if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
@@ -113,6 +119,42 @@ void cpu_run(struct cpu *cpu)
     case MUL:
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
+      break;
+    case ADD:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
+    case PUSH:
+      cpu->registers[SP]--; // decrement SP
+      reg = cpu->ram[cpu->pc + 1];
+      v = cpu->registers[reg]; // now push v on stack
+      cpu->ram[cpu->registers[SP]] = v;
+      cpu->pc += 2; // this is a 2-byte instruction
+      break;
+    case POP:
+      reg = cpu->ram[cpu->pc + 1];
+      v = cpu->ram[cpu->registers[SP]];
+      cpu->registers[reg] = v;
+      cpu->registers[SP]++;
+      cpu->pc += 2; // this is a 2-byte instruction
+      break;
+    case CALL:
+      // push return addr on stack
+      retaddr = cpu->pc + 2;
+      cpu->registers[SP]--; // decrement SP
+      cpu->ram[cpu->registers[SP]] = retaddr;
+
+      // set the cpu->PC to the subroutine address
+      reg = cpu->ram[cpu->pc + 1];
+      cpu->pc = cpu->registers[reg];
+      break;
+    case RET:
+      // pop return addr from stack
+      retaddr = cpu->ram[cpu->registers[SP]];
+      cpu->registers[SP]++;
+
+      // Set cpu->pc to return addr
+      cpu->pc = retaddr;
       break;
     case HLT:
       running = 0;

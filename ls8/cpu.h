@@ -24,7 +24,8 @@ struct cpu
 // ALU operations
 enum alu_op
 {
-  ALU_MUL = 0b10100010
+  ALU_MUL = 0b10100010,
+  ALU_ADD = 0b10100000
   // Add more here
 };
 
@@ -33,10 +34,15 @@ enum alu_op
 // These use binary literals. If these aren't available with your compiler, hex
 // literals should be used.
 
-#define LDI 0b10000010 // Set the value of a register to an integer.
-#define PRN 0b01000111 // Print numeric value stored in the given register.
-#define HLT 0b00000001 // Halt
-#define MUL 0b10100010 // Multiply
+#define LDI 0b10000010  // Set the value of a register to an integer.
+#define PRN 0b01000111  // Print numeric value stored in the given register.
+#define HLT 0b00000001  // Halt
+#define MUL 0b10100010  // Multiply
+#define PUSH 0b01000101 // Push
+#define POP 0b01000110  // POP
+#define CALL 0b01010000 // CALL
+#define RET 0b00010001  // RET
+#define ADD 0b10100000  // ADD
 
 // TODO: more instructions here. These can be used in cpu_run().
 
