@@ -77,6 +77,10 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     // TODO
     cpu->registers[0] = cpu->registers[regA] + cpu->registers[regB];
     break;
+  case ALU_MOD:
+    // TODO
+    cpu->registers[0] = cpu->registers[regA] % cpu->registers[regB];
+    break;
   case ALU_CMP:
     // TODO
     // `FL` bits: `00000LGE`
@@ -140,6 +144,17 @@ void cpu_run(struct cpu *cpu)
         cpu->pc += 2;
       }
       break;
+    case JEQ:
+      if (cpu->fl == 1)
+      {
+        cpu->pc = cpu->registers[operandA];
+      }
+      else
+      {
+        cpu->pc += 2;
+      }
+
+      break;
     case CMP:
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
@@ -153,6 +168,10 @@ void cpu_run(struct cpu *cpu)
       cpu->pc += 3;
       break;
     case ADD:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
+    case MOD:
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
       break;
