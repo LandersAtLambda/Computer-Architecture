@@ -12,7 +12,7 @@ struct cpu
   // TODO
 
   // PC
-  int pc;
+  int pc, fl;
 
   // registers (array)
   unsigned char registers[8];
@@ -25,7 +25,9 @@ struct cpu
 enum alu_op
 {
   ALU_MUL = 0b10100010,
-  ALU_ADD = 0b10100000
+  ALU_ADD = 0b10100000,
+  ALU_CMP = 0b10100111,
+  ALU_MOD = 0b10100100,
   // Add more here
 };
 
@@ -43,7 +45,14 @@ enum alu_op
 #define CALL 0b01010000 // CALL
 #define RET 0b00010001  // RET
 #define ADD 0b10100000  // ADD
+#define MOD 0b10100100  // MOD
 
+#define CMP 0b10100111 // CMP
+#define JMP 0b01010100 // JMP - Jump to the address stored in the given register.
+#define JEQ 0b01010101 // JEQ - If `equal` flag is set (true), jump to the address stored in the given register.
+#define JNE 0b01010110 // JNE - If `E` flag is clear (false, 0), jump to the address stored in the given register.
+
+#define SP 7
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations

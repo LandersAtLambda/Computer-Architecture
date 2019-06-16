@@ -77,6 +77,26 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     // TODO
     cpu->registers[0] = cpu->registers[regA] + cpu->registers[regB];
     break;
+  case ALU_MOD:
+    // TODO
+    cpu->registers[0] = cpu->registers[regA] % cpu->registers[regB];
+    break;
+  case ALU_CMP:
+    // TODO
+    // `FL` bits: `00000LGE`
+    if (cpu->registers[regA] < cpu->registers[regB])
+    {
+      cpu->fl = 00000100;
+    }
+    else if (cpu->registers[regA] > cpu->registers[regB])
+    {
+      cpu->fl = 00000010;
+    }
+    else if (cpu->registers[regA] == cpu->registers[regB])
+    {
+      cpu->fl = 00000001;
+    }
+    break;
 
     // TODO: implement more ALU ops
   }
@@ -90,12 +110,11 @@ void cpu_run(struct cpu *cpu)
   int running = 1; // True until we get a HLT instruction
   int instruction; // Instruction Register, contains a copy of the currently executing instruction
   int operandA, operandB, reg, v, retaddr;
-  int SP = 7;
 
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
-    // printf("TRACE: %02X: %02X %02X %02X\n", cpu->pc, instruction, cpu->ram[cpu->pc + 1], cpu->ram[cpu->pc + 2]);
+    // printf(" PC: %02X  INST: %02X \n", cpu->pc, instruction);
     if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
@@ -112,6 +131,34 @@ void cpu_run(struct cpu *cpu)
       cpu->registers[operandA] = operandB;
       cpu->pc += 3;
       break;
+    case JMP:
+      cpu->pc = cpu->registers[operandA];
+      break;
+    case JNE:
+      if (cpu->fl != 1)
+      {
+        cpu->pc = cpu->registers[operandA];
+      }
+      else
+      {
+        cpu->pc += 2;
+      }
+      break;
+    case JEQ:
+      if (cpu->fl == 1)
+      {
+        cpu->pc = cpu->registers[operandA];
+      }
+      else
+      {
+        cpu->pc += 2;
+      }
+
+      break;
+    case CMP:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
     case PRN:
       printf("%d\n", cpu->registers[operandA]);
       cpu->pc += 2;
@@ -124,19 +171,23 @@ void cpu_run(struct cpu *cpu)
       alu(cpu, instruction, operandA, operandB);
       cpu->pc += 3;
       break;
+    case MOD:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
     case PUSH:
-      cpu->registers[SP]--; // decrement SP
+      cpu->registers[SP]--;
       reg = cpu->ram[cpu->pc + 1];
-      v = cpu->registers[reg]; // now push v on stack
+      v = cpu->registers[reg];
       cpu->ram[cpu->registers[SP]] = v;
-      cpu->pc += 2; // this is a 2-byte instruction
+      cpu->pc += 2;
       break;
     case POP:
       reg = cpu->ram[cpu->pc + 1];
       v = cpu->ram[cpu->registers[SP]];
       cpu->registers[reg] = v;
       cpu->registers[SP]++;
-      cpu->pc += 2; // this is a 2-byte instruction
+      cpu->pc += 2;
       break;
     case CALL:
       // push return addr on stack
